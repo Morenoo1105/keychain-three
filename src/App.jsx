@@ -13,7 +13,6 @@ import {
   useSphericalJoint,
 } from "@react-three/rapier";
 import { MeshLineGeometry, MeshLineMaterial } from "meshline";
-import { Keyring } from "./assets/Keyring";
 import { Cylinder, useGLTF } from "@react-three/drei";
 import { useControls } from "leva";
 
@@ -115,7 +114,7 @@ const Band = () => {
 
   return (
     <>
-      <group position={[0, 4, 0]}>
+      <group position={[0, 2, 0]}>
         <RigidBody
           ref={fixed}
           angularDamping={2}
@@ -146,7 +145,24 @@ const Band = () => {
         >
           <BallCollider args={[0.05]} />
         </RigidBody>
-        <group>
+        <group
+          onPointerUp={(e) => (
+            e.target.releasePointerCapture(e.pointerId),
+            drag(false),
+            setRotate(true),
+            setTimeout(() => {
+              setRotate(false);
+            }, 500)
+          )}
+          onPointerDown={(e) => (
+            e.target.setPointerCapture(e.pointerId),
+            drag(
+              new THREE.Vector3()
+                .copy(e.point)
+                .sub(vec.copy(card.current.translation()))
+            )
+          )}
+        >
           <RigidBody
             angularDamping={2}
             linearDamping={2}
@@ -154,26 +170,26 @@ const Band = () => {
             type={dragged ? "kinematicPosition" : "dynamic"}
             colliders={"trimesh"}
           >
-            <Cylinder
-              args={[0.61, 0.61, 0.12]}
-              visible={false}
-              onPointerUp={(e) => (
-                e.target.releasePointerCapture(e.pointerId),
-                drag(false),
-                setRotate(true),
-                setTimeout(() => {
-                  setRotate(false);
-                }, 500)
-              )}
-              onPointerDown={(e) => (
-                e.target.setPointerCapture(e.pointerId),
-                drag(
-                  new THREE.Vector3()
-                    .copy(e.point)
-                    .sub(vec.copy(card.current.translation()))
-                )
-              )}
-            />
+            {/* <Cylinder
+            args={[0.61, 0.61, 0.12]}
+            visible={false}
+            onPointerUp={(e) => (
+              e.target.releasePointerCapture(e.pointerId),
+              drag(false),
+              setRotate(true),
+              setTimeout(() => {
+                setRotate(false);
+              }, 500)
+            )}
+            onPointerDown={(e) => (
+              e.target.setPointerCapture(e.pointerId),
+              drag(
+                new THREE.Vector3()
+                  .copy(e.point)
+                  .sub(vec.copy(card.current.translation()))
+              )
+            )}
+          /> */}
             <mesh
               ref={anilla}
               geometry={nodes.Circle.geometry}
@@ -192,12 +208,22 @@ const Band = () => {
           <RigidBody
             angularDamping={2}
             linearDamping={2}
-            type={"fixed"}
+            type={"dynamic"}
             colliders={"trimesh"}
-            position={[0, -1, 0]}
+            position={[0, 0, 2]}
           >
-            <mesh geometry={nodes.Circle.geometry} scale={0.3}>
-              <meshBasicMaterial transparent opacity={1} color="white" />
+            <mesh
+              geometry={nodes.Circle.geometry}
+              scale={0.4}
+              rotation={[Math.PI / 2, 0, 0]}
+              position={[0.5, 0, -2]}
+            >
+              <meshBasicMaterial
+                transparent
+                opacity={0.5}
+                color="white"
+                side={THREE.DoubleSide}
+              />
             </mesh>
           </RigidBody>
         </group>
